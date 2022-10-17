@@ -9,7 +9,7 @@ def problem(N, seed=None):
         list(set(random.randint(0, N - 1) for n in range(random.randint(N // 5, N // 2))))
         for n in range(random.randint(N, N * 5))
     ]
-
+    
 class State:
     def __init__(self, sol:list):
         self._solution = sol
@@ -55,23 +55,36 @@ def goal_test(state:State, n:int):
     return len(state.cover) == n
 
 # does the set difference between act_list and state.solution
+# compute the bloat of hypotetical new states and chooses the lists that
+# if added, yield a lower than average bloat
 def possible_actions(state:State, act_list:list):
     r = list() # remaining lists
+    r_best = list() # best remaining  lists
+    b = list() # bloats of hypotetical new states
     for l in act_list:
-        if l not in state.solution:
+        if l not in state.solution and state.cover.union(l) > state.cover:
             r.append(l)
-    return r
+            b.append(bloat(state.solution + [l]))
+    if len(b) > 0:
+        avg_b = sum(b)/len(b)
+        for i in range(len(b)):
+            if b[i] <= avg_b:
+                r_best.append(r[i])
+    return r_best
     
 def take_action(state:State, act:list):
     c = state.copy_solution()
     c.append(act)
     return State(c)
 
-def bloat(state:State):
-    if len(state.solution) == 0:
+def bloat(sol:list):
+    if len(sol) == 0:
         return 1
-    m = sum(len(_) for _ in state.solution)
-    n = len(state.cover)
+    cov = set()
+    for s in sol:
+        cov.update(s)
+    m = sum(len(_) for _ in sol)
+    n = len(cov)
     return (m-n)/n
 
 # return the cardinality of the intersection between state._cover and action
@@ -89,13 +102,16 @@ def search(N):
     
     while state is not None and not goal_test(state, N):
         cnt += 1
+        if cnt % 1000 == 0:
+            logging.debug(f"N = {N}\tVisited nodes = {cnt}")
         for a in possible_actions(state, all_lists):
             new_state = take_action(state, a)
-            cost = num_repeats(state, a) 
+			# the first term is a measure of the impurity (repeated integers) introduced by choosing action a
+			# the second term is a measure of simplicity: if we choose longer lists, the goal state is reached faster, visiting less nodes
+            cost = num_repeats(state, a)/len(a) - len(a)/N
             if new_state not in state_cost and new_state not in frontier:
                 state_cost[new_state] = state_cost[state] + cost
                 frontier.push(new_state, p=state_cost[new_state])
-                logging.debug(f"Added new node to frontier (cost={cost})")
             # don't care to upgrade state_cost since the equal solutions have the same cover
         if frontier:
             state = frontier.pop()
@@ -108,9 +124,10 @@ def search(N):
         f"search solution for N={N}: w={sum(len(_) for _ in solution)} (bloat={(sum(len(_) for _ in solution)-N)/N*100:.0f}%)"
     )
     logging.info(f"Visited nodes = {cnt}")
-    logging.info(f"{solution}")
+    logging.debug(f"{solution}")
 
 logging.getLogger().setLevel(logging.INFO)
+
 
 if __name__ == "__main__":
 	for N in [5, 10, 20]:
