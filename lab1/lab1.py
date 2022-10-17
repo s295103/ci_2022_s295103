@@ -19,7 +19,7 @@ class State:
         self._cover = set()
         for l in self._solution:
             self._cover.update(l)
-     
+    
     def __hash__(self):
         return hash((bytes(self._cover), bytes(sum(sum(_) for _ in self._solution))))
     
@@ -130,7 +130,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 if __name__ == "__main__":
-	for N in [5, 10, 20]:
+	for N in [5, 10, 20, 50]:
 	    search(N)
 
     %timeit search(20)
