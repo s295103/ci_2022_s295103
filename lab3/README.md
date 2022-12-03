@@ -4,8 +4,18 @@ We use a class ```Nim``` to create, store and decrease the heaps and a class ```
 ## Task 3.1 Nim-Sum
 A strategy using the nim-sum technique according to the [nim Wikipedia article](https://en.wikipedia.org/wiki/Nim) that also manages the critical layouts where the nim-sum strategy fails. **It wins roughly 80% of the time against a *random strategy* opponent and 50% of the time against a *nim-sum strategy* one.**
 
-## Task 3.2 Evolutionary Algorithm
-We represented the action to take in each ply with two probabilities: *one to select the heap and one to select the quantity*, storing everything in a list long the maximum number of plies. The fitness was evaluated using the strategy stored in the individual to play a match of 100 games against a nim-sum strategy opponent: the percentage of wins was thus the fitness of the individual. The best implementation so far used an *island model* for diversity control, *(μ, λ) and elitism* for survivor selection, *arithmetic recombination* for binary crossover, *adaptive step size* for mutation and *extinction* when the mean fitness converged. The mean fitness, the best fitness and the standard deviation are plotted for each generation and at the end of the runs, the best strategy is returned. **Yet, the fittest *evolved strategy*, when tested against a nim-sum opponent, perform roughly in line with the mean fitness, not the best fitness.** Since no explanation for this phenomenon has been found, the willing reader is encouraged to analyse the code to reveal this mistery.
+## Task 3.2 Evolutionary Algorithm (v2)
+We represented the strategy as a sequence of IF-ELSE statements, consisting in conditions and actions. A condition is a list of integers, an action is a tuple of integers; everything is mapped to an IF-ELSE statement in this way: <br/>
+```
+heaps : list # list of heaps
+condition : list # list of int
+action: tuple # tuple of int
+decrease_heap(heap_index, quantity): function
+if heap[0] == condition[0] and heap[1] == condition[1] and ... and heaps[n-1] == condition[n-1] then
+    decrease_heap(action[0], action[1])
+```
+Both **conditions** and **actions** are part of the genome; also the **genome size**, that is the number of conditional statements, the **mutation rate** and the **step size** are part of it. The *fitness* is evaluated by testing the strategy against a nim-sum opponent for 100 games: the percentage of victories minus a *penalty* proportional to the *genome size* is the assigned value. The penalty is especially important since the population would evolve to a **brute force** strategy (listing all of the possible states of the heaps and actions) by growing its genome size; it makes sense to prefer the individuals that take the right action ate the right time. The performance varies with the number of heaps, and so the approaches taken to find a suitable solution. **Niching, extinction, step-size adaptation** helped the evolution of a strategy able to compete against nim-sum.
+
 
 ## Task 3.3 MinMax
 Just a classical implementation of the *minmax decision rule*. A game tree is generated enumerating each possible move in every ply, with a depth limited by a look ahead option. **After that, the nodes are evaluated using a *heuristic value* computed by playing a game against a nim-sum strategy opponent, using as inital state the node's heaps: the inverse of the number of plies is the absolute value, while the sign is positive if the player wins, negative viceversa.** The *minmax strategy* is competitive against a random one and itself, while completely losing against a nim-sum opponent.
