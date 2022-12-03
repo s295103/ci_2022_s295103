@@ -14,7 +14,7 @@ decrease_heap(heap_index, quantity): function
 if heap[0] == condition[0] and heap[1] == condition[1] and ... and heaps[n-1] == condition[n-1] then
     decrease_heap(action[0], action[1])
 ```
-Both **conditions** and **actions** are part of the genome; also the **genome size**, that is the number of conditional statements, the **mutation rate** and the **step size** are part of it. The *fitness* is evaluated by testing the strategy against a nim-sum opponent for 100 games: the percentage of victories minus a *penalty* proportional to the *genome size* is the assigned value. The penalty is especially important since the population would evolve to a **brute force** strategy (listing all of the possible states of the heaps and actions) by growing its genome size; it makes sense to prefer the individuals that take the right action ate the right time. The performance varies with the number of heaps, and so the approaches taken to find a suitable solution. **Niching, extinction, step-size adaptation** helped the evolution of a strategy able to compete against nim-sum.
+Both **conditions** and **actions** are part of the genome; also the **genome size**, that is the number of conditional statements, the **mutation rate** and the **step size** are part of it. The *fitness* is evaluated by testing the strategy against a nim-sum opponent for 100 games: the percentage of victories minus a *penalty* proportional to the *genome size* is the assigned value. The training time varies with the number of heaps, and so the approaches taken to find a suitable solution. **Niching, extinction, step-size adaptation** helped the evolution of a strategy able to dominate nim-sum.
 
 
 ## Task 3.3 MinMax
